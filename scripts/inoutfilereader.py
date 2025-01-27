@@ -1,4 +1,5 @@
 import numpy as np
+from simulation import Cylinder
 
 
 def loadCylinders(path):
@@ -18,9 +19,4 @@ def loadCylinders(path):
     cylinderArray = np.loadtxt(path)
     
     # We fill a list with some cylinder objects
-    return [{'x': cylinder[0], 'y': cylinder[1], 'cat': cylinder[2]} for cylinder in cylinderArray]
-
-
-def give_path(commands_as_array):
-
-    np.savetxt('script', commands_as_array)
+    return [Cylinder(cylinder[0], cylinder[1], cylinder[3]) for cylinder in cylinderArray]
