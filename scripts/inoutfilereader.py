@@ -1,14 +1,24 @@
 import numpy as np
 
 
-def get_cylinder(path, object_cylinder):
-
-    cylinder_array = np.loadtxt(path)
-    for i in range(len(cylinder_array)):
-        object_cylinder[i].x= cylinder_array[i][0]
-        object_cylinder[i].y = cylinder_array[i][1]
-        object_cylinder[i].cat = cylinder_array[i][2]
-    return object_cylinder 
+def loadCylinders(path):
+    """
+    Load cylinder data from a file and return a list of cylinder objects.
+    Args:
+        path (str): The file path to load the cylinder data from.
+    Returns:
+        list of dict: A list of dictionaries, each containing 'x', 'y', and 'cat' keys 
+                      representing the cylinder's x-coordinate, y-coordinate, and category, respectively.
+    Raises:
+        IOError: If the file cannot be opened or read.
+        ValueError: If the file content cannot be converted to a numpy array.
+    """
+    
+    # We load file content as a numpy array
+    cylinderArray = np.loadtxt(path)
+    
+    # We fill a list with some cylinder objects
+    return [{'x': cylinder[0], 'y': cylinder[1], 'cat': cylinder[2]} for cylinder in cylinderArray]
 
 
 def give_path(commands_as_array):
