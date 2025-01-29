@@ -1,9 +1,16 @@
 """The file to run the program"""
 
-import inoutfilereader as io 
+import inoutfilereader as io
+import pathsearch as ps
 import visualise as vs
 
-cylinders = io.loadCylinders('examples\donnees-map.txt')
+# for mapId in range(11):
+#     cylinders = io.loadCylinders(f'examples\maps-test\donnees-map-{mapId}.txt')
+#     bestOrder = ps.bestOrderOfCylinders(cylinders, (0, 0))
+#     path = ps.pathFromCylindersOrder(cylinders, bestOrder, (0, 0))
+#     vs.showSimulation(cylinders, (0, 0), path)
 
-vs.tracer_point(cylinders=cylinders)
-vs.show()
+cylinders = io.loadCylinders('examples\maps-test\donnees-map-0.txt')
+bestOrder = ps.bestOrderOfCylinders(cylinders, (0, 0))
+path = ps.pathFromCylindersOrder(cylinders, bestOrder, (0, 0))
+vs.showSimulation(cylinders, (0, 0), path)

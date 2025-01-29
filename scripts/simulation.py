@@ -2,19 +2,19 @@
 import math
 
 
-class Robot():
+class Robot:
     
     # Comsumption parameters (to calculate the fuel consumption)
     comsumptionParams = {
-        'b': 1e-2, 
-        'b0': 1e-2
+        'b': 3,# l/m 
+        'b0': 100# l/m.kg
     }
-    initialFuelQuantity = 1e4
+    initialFuelQuantity = 10000# l
 
     # Speed parameters (to calculate the speed of the robot)
     speedParams = {
         'alpha': 0.0698,
-        'V0': 1.0 # m/s
+        'V0': 1.0# m/s
     }
 
 
@@ -108,6 +108,10 @@ class Cylinder:
             'value': 3.0,
         },
     }
+    
+    # Cylinder radius
+    radius = 0.5# m
+    touchingRadius = 1.6# m
     
     def __init__(self, x, y, cat):
         """
