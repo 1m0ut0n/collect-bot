@@ -2,6 +2,9 @@
 import math
 
 
+totalTime = 600# s
+
+
 class Robot:
     
     # Comsumption parameters (to calculate the fuel consumption)
