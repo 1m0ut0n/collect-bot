@@ -7,7 +7,7 @@ import random
 import concurrent.futures as cf
 
 
-def monteCarlo(nbIteration, maxWorkers=10, log=False) :
+def monteCarlo(nbIteration, maxWorkers=32, log=False) :
     """
     Perform a Monte Carlo simulation to optimize parameters for a given number of iterations.
 
