@@ -123,3 +123,32 @@ def showSimulation(cylinders, initialPosition, chosenPath):
         plt.pause(0.3)
     # We show the final plot
     plt.show()
+    # Return the number of points
+    return currentPoints
+
+
+def justEstimatePoints(path, cylinders):
+    """
+    Just estimate the number of points that will be collected by the robot by following the given path.
+
+    Args:
+        path (list): A list of positions (tuples) representing the path from the initial position through the ordered cylinders.
+        cylinders (list): A list of cylinder objects.
+
+    Returns:
+        float: The estimated number of points that will be collected by the robot.
+    """
+    points = 0
+    mass = 0
+    remainingTime, remainingFuel = sim.totalTime, sim.Robot.initialFuelQuantity
+    for point in range(1, len(path)):
+        distanceOfSegment = distance(path[point-1], path[point])
+        for cylinder in cylinders:
+            if distance(path[point], cylinder.getPosition()) < TOO_CLOSE_CYLINDER:
+                points += cylinder.getValue()
+                mass += cylinder.getMass()
+        remainingTime -= sim.Robot.timeCost(distanceOfSegment, mass)
+        remainingFuel -= sim.Robot.fuelCost(distanceOfSegment, mass)
+        if remainingTime < 0 or remainingFuel < 0:
+            break
+    return points
