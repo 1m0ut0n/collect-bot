@@ -3,9 +3,10 @@ from simulation import Robot, Cylinder
 import math
 #import matplotlib.pyplot as plt
 
-# Ponderation of the fuel cost and the time cost
-FUEL_IMPORTANCE = 0.5
-TIME_IMPORTANCE = 0.5
+# Ponderation of the fuel cost, the time cost and the value gain
+FUEL_IMPORTANCE = 0.60
+TIME_IMPORTANCE = 0.40
+VALUE_IMPORTANCE = 0.147
 
 
 # Distance at wich the robot is too close to a cylinder
@@ -28,10 +29,10 @@ def costOfTravel(distance, mass):
     return FUEL_IMPORTANCE * Robot.fuelCost(distance, mass) + TIME_IMPORTANCE * Robot.timeCost(distance, mass)
 
 
-def bestOrderOfCylinders(cylinders, initialPosition):
+def dumbOrderOfCylinders(cylinders, initialPosition):
     """
-    Returns the best order of cylinders to pick up based on the cost of traveling between them.
-    This function uses a brute-force approach to calculate the best order of cylinders to pick up based on the cost of traveling between them. The function calculates the cost of traveling between all possible combinations of cylinders and returns the order that minimizes the total cost.
+    Returns an order of cylinders to pick up based on the cost of traveling between them.
+    This function uses a brute-force approach to calculate the best order of cylinders to pick up based on the cost of traveling between them.
 
     Parameters:
     cylinders (list): A list of cylinder objects.
@@ -52,7 +53,9 @@ def bestOrderOfCylinders(cylinders, initialPosition):
         leastCost, leastCostCylinderId = None, None
         for cylinderId in remainingCylindersId:
             # We calculate the cost of traveling between the current position and the cylinder
-            cost = costOfTravel(distance(currentPosition, cylinders[cylinderId].getPosition()), currentMass)
+            cost = costOfTravel(distanceToCylindersWithAvoidance(cylinders, cylinderId, currentPosition, order), currentMass)
+            # We divide the cost if the value is good
+            cost /= cylinders[cylinderId].getValue() ** VALUE_IMPORTANCE
             leastCostCylinderId, leastCost = (cylinderId, cost) if leastCost is None or cost < leastCost else (leastCostCylinderId, leastCost)
         remainingCylindersId.remove(leastCostCylinderId)
         order.append(leastCostCylinderId)
@@ -60,6 +63,24 @@ def bestOrderOfCylinders(cylinders, initialPosition):
         currentPosition = cylinders[leastCostCylinderId].getPosition()
         
     return order
+
+
+def improveWith2Opt(cylinders, order):
+    improve = True
+    while improve:
+        improve = False
+        for numberI in range(1, len(order)-2):
+            for numberJ in range(numberI+1, len(order)-1):
+                a = distanceToCylindersWithAvoidance(cylinders, order[numberI], cylinders[order[numberI+1]].getPosition(), order[:numberI+2])
+                b = distanceToCylindersWithAvoidance(cylinders, order[numberJ], cylinders[order[numberJ+1]].getPosition(), order[:numberJ+2])
+                c = distanceToCylindersWithAvoidance(cylinders, order[numberI], cylinders[order[numberJ]].getPosition(), order[:numberI+1] + [order[numberJ]])
+                d = distanceToCylindersWithAvoidance(cylinders, order[numberI+1], cylinders[order[numberJ+1]].getPosition(), order[:numberJ+2])
+                if a + b > c + d:
+                    order[numberI+1:numberJ+1] = order[numberI+1:numberJ+1][::-1]
+                    improve = True
+    return order
+
+
             
             
 def pathFromCylindersOrder(cylinders, order, initialPosition):
@@ -84,20 +105,19 @@ def pathFromCylindersOrder(cylinders, order, initialPosition):
     # Return the decided path
     return path
 
-
-def distanceBetweenCylindersWithAvoidance(cylinders, idCylinder1, idCylinder2):
+def distanceToCylindersWithAvoidance(cylinders, idCylinder, position, exludesCylindersId=[]):
     """
-    Returns the distance between two cylinders.
+    Returns the distance between a position and cylinders.
     If there is an obstacle between the two cylinders, an avoidance path is calculated and this distance is being calculated.
 
     Parameters:
-    cylinder1 (tuple): The first cylinder.
-    cylinder2 (tuple): The second cylinder.
+    cylinder1 (tuple): The goal cylinder.
+    position (tuple): The current position.
 
     Returns:
-    float: The distance between the two cylinders.
+    float: The distance between the position and cylinders.
     """
-    return distanceOfPath(avoidCylinder(cylinders, cylinders[idCylinder1].getPosition(), cylinders[idCylinder2].getPosition(), [idCylinder1, idCylinder2]))
+    return distanceOfPath(avoidCylinder(cylinders, position, cylinders[idCylinder].getPosition(), [idCylinder] + exludesCylindersId))
 
 
 def avoidCylinder(cylinders, beginPosition, endPosition, exludesCylindersId=[]):
@@ -195,7 +215,7 @@ def distanceOfPath(listOfPoint):
     Returns:
     float: The distance of the path.
     """
-    distance = 0
+    d = 0
     for i in range(1, len(listOfPoint)):
-        distance += distance(listOfPoint[i - 1], listOfPoint[i])
-    return distance
+        d += distance(listOfPoint[i - 1], listOfPoint[i])
+    return d
