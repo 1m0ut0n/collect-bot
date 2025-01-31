@@ -27,12 +27,14 @@ def monteCarlo(nbIteration, maxWorkers=32, log=False) :
                 (VALUE_IMPORTANCE, MASS_IMPORTANCE, DISTANCE_IMPORTANCE) used in each iteration.
             - result (list of float): The average points estimated for each set of parameters.
     """
-    # To store the results and th tested parameters
+    # To store the results and the tested parameters
     triedParams, result = [], []
+    # We load all the maps
+    maps = [io.loadCylinders(f'examples/maps-eval/donnees-map-{i}.txt') for i in range(1, 11)]
     # We start the a multithreaded executor to accelerate the process
     with cf.ThreadPoolExecutor(max_workers=maxWorkers) as executor:
         # For each iteration, we run the simulation with random parameters
-        futures = {executor.submit(testRandomParameters, (0, 1), (0, 1)): iteration for iteration in range(nbIteration)}
+        futures = {executor.submit(testRandomParameters, (0, 1), (0, 1), maps): iteration for iteration in range(nbIteration)}
         # We check for completed processes
         for completedFutures in cf.as_completed(futures):
             iteration = futures[completedFutures]
@@ -52,7 +54,7 @@ def monteCarlo(nbIteration, maxWorkers=32, log=False) :
     return triedParams, result
 
 
-def testRandomParameters(minMaxTimeMass, minMaxValue):
+def testRandomParameters(minMaxTimeMass, minMaxValue, maps):
     """
     Set random values for the parameters and run the simulation for each map.
 
@@ -69,10 +71,10 @@ def testRandomParameters(minMaxTimeMass, minMaxValue):
     ps.MASS_IMPORTANCE = 1 - ps.TIME_IMPORTANCE
     ps.VALUE_IMPORTANCE = random.uniform(0,1)
     # For each map, rum the simulation and return the points and parameters
-    return getAverageOnMaps(), (ps.TIME_IMPORTANCE, ps.MASS_IMPORTANCE, ps.VALUE_IMPORTANCE)
+    return getAverageOnMaps(maps), (ps.TIME_IMPORTANCE, ps.MASS_IMPORTANCE, ps.VALUE_IMPORTANCE)
 
 
-def getAverageOnMaps():
+def getAverageOnMaps(maps):
     """
     Calculates the average points from cylinder data across multiple maps.
 
@@ -85,9 +87,7 @@ def getAverageOnMaps():
         float: The average points estimated for the given maps.
     """
     points = []
-    for mapId in range(1,11):
-        # Load cylinder data from the file
-        cylinders = io.loadCylinders(f'examples\maps-eval\donnees-map-{mapId}.txt')
+    for cylinders in maps:
         # Find a dumb of exploration of cylinders
         dumbOrder = ps.dumbOrderOfCylinders(cylinders, (0, 0))
         # Improve it wit 2-opt
