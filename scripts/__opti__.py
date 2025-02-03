@@ -66,9 +66,9 @@ def testRandomParameters(minMaxTimeMass, minMaxValue, maps):
            (TIME_IMPORTANCE, MASS_IMPORTANCE, VALUE_IMPORTANCE).
     """
     # Set randomly the values of the parameters
-    ps.TIME_IMPORTANCE = random.uniform(0,1)
+    ps.TIME_IMPORTANCE = random.uniform(minMaxTimeMass[0], minMaxTimeMass[1])
     ps.MASS_IMPORTANCE = 1 - ps.TIME_IMPORTANCE
-    ps.VALUE_IMPORTANCE = random.uniform(0,1)
+    ps.VALUE_IMPORTANCE = random.uniform(minMaxValue[0], minMaxValue[1])
     # For each map, rum the simulation and return the points and parameters
     return getAverageOnMaps(maps), (ps.TIME_IMPORTANCE, ps.MASS_IMPORTANCE, ps.VALUE_IMPORTANCE)
 

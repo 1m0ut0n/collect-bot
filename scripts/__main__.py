@@ -6,7 +6,7 @@ import visualise as vs
 
 
 
-def runSimulation(filename, show=True):
+def runSimulation(filename, outDir, outFilename, show=True):
     """
     Run the simulation for a given map file.
 
@@ -24,6 +24,10 @@ def runSimulation(filename, show=True):
     improvedOrder = ps.improveWith2Opt(cylinders, dumbOrder)
     # Generate the path from the best order
     path = ps.pathFromCylindersOrder(cylinders, improvedOrder, (0, 0))
+    # Generate the movements for the robot
+    movements = ps.generateMouvement(path)
+    # Save the movements to a file
+    io.saveMovements(movements, outFilename, outDir)
     # Visualize the path
     if show:
         return vs.showSimulation(cylinders, (0, 0), path)
@@ -34,6 +38,6 @@ def runSimulation(filename, show=True):
 if __name__ == "__main__":
     points = []
     for mapId in range(1,11):
-        points.append(runSimulation(f'examples\maps-eval\donnees-map-{mapId}.txt', show=False))
+        points.append(runSimulation(f'examples\maps-eval\donnees-map-{mapId}.txt', 'dist', f'script-{mapId}.txt', show=False))
     print(points)
     print(sum(points)/len(points))

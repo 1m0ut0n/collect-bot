@@ -19,6 +19,9 @@ class Robot:
         'alpha': 0.0698,
         'V0': 1.0# m/s
     }
+    
+    # Orientation parameters
+    initialOrientation = 0# degrees
 
 
     def speed(mass):

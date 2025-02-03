@@ -4,9 +4,9 @@ import math
 #import matplotlib.pyplot as plt
 
 # Ponderation of the fuel cost, the time cost and the value gain
-FUEL_IMPORTANCE = 0.60
-TIME_IMPORTANCE = 0.40
-VALUE_IMPORTANCE = 0.147
+FUEL_IMPORTANCE = 0.33
+TIME_IMPORTANCE = 0.67
+VALUE_IMPORTANCE = 0.3685
 
 
 # Distance at wich the robot is too close to a cylinder
@@ -219,3 +219,55 @@ def distanceOfPath(listOfPoint):
     for i in range(1, len(listOfPoint)):
         d += distance(listOfPoint[i - 1], listOfPoint[i])
     return d
+
+
+def angleDiff(a1, a2):
+    """
+    Returns the minimal angle difference between two angles in degrees.
+
+    Parameters:
+    a1 (float): The first angle.
+    a2 (float): The second angle.
+
+    Returns:
+    float: The minimal angle difference between the two angles.
+    """
+    diff = (a2 - a1) % 360
+    return diff - 360 if diff > 180 else diff
+
+def generateMouvement(path):
+    """
+    Generates a list of movement commands for a robot to follow a given path.
+
+    Args:
+        path (list of tuple): A list of (x, y) coordinates representing the path.
+
+    Returns:
+        list of str: A list of movement commands. Each command is either a 
+                     "TURN <angle>" command to rotate the robot by the specified 
+                     angle in degrees, a "GO <distance>" command to move the robot 
+                     forward by the specified distance, or a "FINISH" command to 
+                     indicate the end of the path.
+    """
+    mouvement = []
+    # Initial direction
+    currentAngle = Robot.initialOrientation
+    # For each segment of the path, we take the pouint that define it
+    for i in range(len(path) - 1):
+        x1, y1 = path[i]
+        x2, y2 = path[i+1]
+        # Calcul of the target direction
+        targetAngle = math.degrees(math.atan2(y2 - y1, x2 - x1))
+        # Calcul of the rotation
+        turnAngle = angleDiff(currentAngle, targetAngle)
+        # If the rotation is not too small, we add it to the file
+        if abs(turnAngle) > 1e-6:
+            mouvement.append(f"TURN {turnAngle:.2f}")
+        # Distance between the points
+        dist = distance((x1, y1), (x2, y2))
+        mouvement.append(f"GO {dist:.2f}")
+        # Store the new current angle
+        currentAngle = targetAngle
+    # We add the finish line and return the list
+    mouvement.append("FINISH")
+    return mouvement
